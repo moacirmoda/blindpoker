@@ -163,6 +163,10 @@
 				</div>
 			</div>
 
+			<!-- <div style="display:none">
+				<audio id="alarm" controls><source src="alarm.mp3" type="audio/mpeg"></audio>
+			</div> -->
+
 		</div>
 		
 		<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
@@ -196,6 +200,11 @@
 				});
 			});
 
+			function alarm() {
+				var clickSound = new Audio('alarm.mp3');
+				clickSound.play();
+			}
+
 			function n(n){
 			    return n > 9 ? "" + n: "0" + n;
 			}
@@ -209,6 +218,7 @@
 					start_minute = blind[0];
 					start_second = blind[1];
 					change_blind();
+					alarm();
 				} else {
 					start_second--;
 				}
