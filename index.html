@@ -116,7 +116,7 @@
 						</div>
 						<div class="span3">
 							<b>Total de rebuys:</b><br>
-							<span id="total_rebuy"></span>
+							<span id="total_rebuy">0</span>
 						</div>
 						<div class="span3">
 							<b>Tempo de jogo:</b><br>
@@ -124,7 +124,7 @@
 						</div>
 						<div class="span3">
 							<b>Total de fichas:</b><br>
-							<span id="total_fichas"></span>
+							<span id="total_fichas">0</span>
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -156,8 +156,8 @@
 
 					<div class="row-fluid">
 						<div class="buttons">
-							<button class='btn btn-primary btn-large'>Rebuy</button>
-							<button class='btn btn-primary btn-large'>Eliminação</button>
+							<a href="javascript:add_rebuy();" class='btn btn-primary btn-large'>Rebuy</a>
+							<a href="javascript:eliminacao();" class='btn btn-primary btn-large'>Eliminação</a>
 						</div>
 					</div>
 				</div>
@@ -169,23 +169,21 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script>
 			second_size = 1000;
+
+			var buyin =  $("#buyin").val();
+			var jogadores =  $("#jogadores").val();
+			var stack =  $("#stack").val();
+			var blind = $("#blind").val().split(",");
+
 			$(function(){
 				$("#board").hide();
 				$("form").submit(function(e){
 					e.preventDefault();
 
-					var buyin =  $("#buyin").val();
-					var jogadores =  $("#jogadores").val();
-					var stack =  $("#stack").val();
-					var blind = $("#blind").val().split(",");
-
 					// jogadores
 					$("#jogadores_restantes").html(jogadores);
 					add_jogador(jogadores);
 					
-					// rebuy
-					add_rebuy(0);
-
 					// time e blinds
 					start_time();
 					change_blind();
@@ -241,11 +239,19 @@
 				$("#blind_value").html(new_blind);
 			}
 
+			function eliminacao() {
+				var jogadores_restantes =  parseInt($("#jogadores_restantes").html());
+				$("#jogadores_restantes").html(jogadores_restantes - 1);
+				media_de_fichas();
+			}
+
 			function media_de_fichas() {
 				var jogadores_restantes =  $("#jogadores_restantes").html();
 				var total_fichas = $("#total_fichas").html();
 
-				$("#media_fichas").html(parseInt(total_fichas) / parseInt(jogadores_restantes));
+				var media = parseInt(total_fichas) / parseInt(jogadores_restantes);
+				media = parseInt(media);
+				$("#media_fichas").html(media);
 			}
 
 			function add_jogador(jogadores) {
@@ -263,18 +269,22 @@
 			}
 
 			function add_premiacao(value) {
-				var premiacao_atual =  $("#premiacao").val();
-				$("#premiacao").html(premiacao_atual + value);
+				var premiacao_atual =  $("#premiacao").html();
+				$("#premiacao").html(parseInt(premiacao_atual) + parseInt(value));	
 			}
 
 			function add_stack(value) {
-				var item =  $("#total_fichas").val();
-				$("#total_fichas").html(item + value);
+				var item =  $("#total_fichas").html();
+				$("#total_fichas").html(parseInt(item) + parseInt(value));
 			}
 
-			function add_rebuy(value) {
-				var item =  $("#total_rebuy").val();
-				$("#total_rebuy").html(item + value);	
+			function add_rebuy() {
+				var item =  $("#total_rebuy").html();
+				$("#total_rebuy").html(parseInt(item) + 1);
+
+				add_stack(stack);
+				add_premiacao(buyin);
+				media_de_fichas();
 			}
 
 			function start_time() {
