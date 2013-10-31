@@ -1,0 +1,302 @@
+<!DOCTYPE HTML>
+<html lang='pt-br'>
+	<head>
+		<!-- Le styles -->
+		<link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap.css" rel="stylesheet">
+	    <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap-responsive.css" rel="stylesheet">
+	    <link href="http://getbootstrap.com/2.3.2/assets/css/docs.css" rel="stylesheet">
+	    <link href="http://getbootstrap.com/2.3.2/assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="utf-8">
+
+		<style>
+			#form {
+				max-width: 500px;
+				margin: 0 auto;
+				background-color: #eee;
+				padding: 10px;
+			}
+			#board {
+				margin: 0 auto;
+				max-width: 800px;
+
+			}
+			#board .info .row-fluid {
+				margin: 20px 0;
+			}
+			#board .counter {
+				text-align: center;
+				margin: 40px 0;
+			}
+			#board .counter .blind {
+				font-size: 20pt;
+			}
+			#board .counter .time {
+				padding: 70px 0 0 0;
+				font-size: 90pt;
+			}
+			#board .counter .buttons {
+				padding: 70px 0 0 0;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<div class="container-fluid">
+			
+			<div id="form">
+			
+				<form class="form">
+					<fieldset>
+						<div class="row-fluid">
+							<div class="span8">
+								<div class="control-group">
+									<label class="control-label" for="jogadores">Quantidade de jogadores</label>
+									<div class="controls">
+										<input type="number" class='input-xlarge' name="jogadores" id="jogadores" value="6" required="true">
+									</div>
+								</div>
+							</div>
+
+							<div class="span4">
+								<div class="control-group">
+									<label class="control-label" for="buyin">Buy-in</label>
+									<div class="controls">
+										<div class="input-prepend input-append">
+											<span class="add-on">R$</span>
+											<input type="text" class='span4' name="buyin" id="buyin" value="5" required="true">
+											<span class="add-on">.00</span>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+						</div>
+						
+						<div class="row-fluid">
+							<div class="span6">
+								<div class="control-group">
+									<label class="control-label" for="blind">Blind</label>
+									<div class="controls">
+										<select name="blind" id="blind">
+											<option value="10,00">10 minutos</option>
+											<option value="15,00">15 minutos</option>
+											<option value="20,00">20 minutos</option>
+											<option value="30,00">30 minutos</option>
+											<option value="45,00">45 minutos</option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<div class="span6">
+								<div class="control-group">
+									<label class="control-label" for="stack">Stack Inicial</label>
+									<div class="controls">
+										<input type="number" name="stack" id="stack" value="5000" step='500' required="true">
+									</div>
+								</div>
+							</div>
+						</div>
+
+					<fieldset>
+					<button class='btn btn-primary ' id="submit">Começar</button>
+				</form>
+			</div>
+
+			<div id="board">
+				<div class="info">
+					<div class="row-fluid">
+						<div class="span3">
+							<b>Premiação total:</b><br> 
+							R$ <span id="premiacao">0</span>,00
+						</div>
+						<div class="span3">
+							<b>Total de rebuys:</b><br>
+							<span id="total_rebuy"></span>
+						</div>
+						<div class="span3">
+							<b>Tempo de jogo:</b><br>
+							<span id="tj_hora">0</span>:<span id="tj_minuto">0</span>:<span id="tj_segundo">0</span>
+						</div>
+						<div class="span3">
+							<b>Total de fichas:</b><br>
+							<span id="total_fichas"></span>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="span4">
+							<b>Total de Jogadores:</b><br> 
+							<span id="total_jogadores">0</span>
+						</div>
+						<div class="span4">
+							<b>Jogadores Restantes:</b><br>
+							<span id="jogadores_restantes"></span>
+						</div>
+						<div class="span4">
+							<b>Média de Ficha:</b><br>
+							<span id="media_fichas"></span>
+						</div>
+					</div>
+				</div>
+				<div class="counter">
+					<div class="row-fluid">
+						<div class="blind">
+							Blind <span id="blind_value">0/0</span>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="time">
+							<span id="divminute"></span>:<span id="divsecond"></span>
+						</div>
+					</div>
+
+					<div class="row-fluid">
+						<div class="buttons">
+							<button class='btn btn-primary btn-large'>Rebuy</button>
+							<button class='btn btn-primary btn-large'>Eliminação</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		
+		<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script>
+			second_size = 1000;
+			$(function(){
+				$("#board").hide();
+				$("form").submit(function(e){
+					e.preventDefault();
+
+					var buyin =  $("#buyin").val();
+					var jogadores =  $("#jogadores").val();
+					var stack =  $("#stack").val();
+					var blind = $("#blind").val().split(",");
+
+					// jogadores
+					$("#jogadores_restantes").html(jogadores);
+					add_jogador(jogadores);
+					
+					// rebuy
+					add_rebuy(0);
+
+					// time e blinds
+					start_time();
+					change_blind();
+
+					// start countdown
+					countdown(blind[0], blind[1]);
+					
+					$("#board").show();
+					$("#form").hide();
+				});
+			});
+
+			function n(n){
+			    return n > 9 ? "" + n: "0" + n;
+			}
+			function countdown(start_minute, start_second) {
+
+				if(start_second == 0 && start_minute != 0) {
+					start_minute--;
+					start_second = 59;
+				} else if(start_second == 0 && start_minute == 0) {
+					var blind = $("#blind").val().split(",");
+					start_minute = blind[0];
+					start_second = blind[1];
+					change_blind();
+				} else {
+					start_second--;
+				}
+				
+				$("#divminute").html(n(start_minute));
+				$("#divsecond").html(n(start_second));
+				
+				setTimeout('countdown('+start_minute+','+start_second+')',second_size);
+			}
+
+			// font: http://www.pokersite.org/poker-strategy/sit-and-go/site-structures/
+			function change_blind() {
+				var blind = $("#blind_value").html();
+				blind = blind.split('/')[1];
+
+				blind = parseInt(blind);
+				if (blind < 200) {
+					blind = blind + 50;
+				} else if (blind >= 200 && blind < 800) {
+					blind = blind + 200;
+				} else if (blind >= 800 && blind < 2000) {
+					blind = blind + 400;
+				} else if (blind >= 2000) {
+					blind = blind + 1000;
+				}
+				
+				new_blind = blind/2 + "/" + blind;
+				$("#blind_value").html(new_blind);
+			}
+
+			function media_de_fichas() {
+				var jogadores_restantes =  $("#jogadores_restantes").html();
+				var total_fichas = $("#total_fichas").html();
+
+				$("#media_fichas").html(parseInt(total_fichas) / parseInt(jogadores_restantes));
+			}
+
+			function add_jogador(jogadores) {
+				var buyin =  $("#buyin").val();
+				var stack =  $("#stack").val();
+				var total_jogadores =  $("#total_jogadores").html();
+
+				// infos
+				add_premiacao(buyin * jogadores);
+				add_stack(stack * jogadores);
+
+				$("#total_jogadores").html(parseInt(total_jogadores) + parseInt(jogadores));
+				
+				media_de_fichas();
+			}
+
+			function add_premiacao(value) {
+				var premiacao_atual =  $("#premiacao").val();
+				$("#premiacao").html(premiacao_atual + value);
+			}
+
+			function add_stack(value) {
+				var item =  $("#total_fichas").val();
+				$("#total_fichas").html(item + value);
+			}
+
+			function add_rebuy(value) {
+				var item =  $("#total_rebuy").val();
+				$("#total_rebuy").html(item + value);	
+			}
+
+			function start_time() {
+				var hora = parseInt($("#tj_hora").html());
+				var minuto = parseInt($("#tj_minuto").html());
+				var segundo = parseInt($("#tj_segundo").html());
+
+				segundo++;
+				if(segundo == 60) {
+					segundo = 0;
+					minuto++;
+				}
+				if(minuto == 60) {
+					minuto = 0;
+					hora++;
+				}
+
+				$("#tj_hora").html(n(hora));
+				$("#tj_minuto").html(n(minuto));
+				$("#tj_segundo").html(n(segundo));
+				setTimeout('start_time()',second_size);
+			}
+		</script>
+	</body>
+</html>
